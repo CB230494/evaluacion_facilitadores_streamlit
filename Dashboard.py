@@ -17,10 +17,16 @@ sheet = client.open(SHEET_NAME).sheet1
 data = pd.DataFrame(sheet.get_all_records())
 
 # ==== LIMPIAR nombres de columnas ====
-data.columns = data.columns.str.strip()
+data.columns = data.columns.map(str).str.strip()
 
-# ==== Agregar ID único ====
-data.insert(0, "ID", range(1, 1 + len(data)))
+# ==== EXPLOTAR facilitadores múltiples ====
+data["Facilitador"] = data["Facilitador"].str.split(",\s*")  # Separa múltiples nombres
+data = data.explode("Facilitador")                           # Crea filas separadas
+data["Facilitador"] = data["Facilitador"].str.strip()         # Limpia espacios
+
+# ==== Agregar ID único (opcional) ====
+if "ID" not in data.columns:
+    data.insert(0, "ID", range(1, 1 + len(data)))
 
 # ==== Título Principal ====
 st.title("📈 Dashboard de Evaluaciones de Facilitadores")
@@ -61,7 +67,7 @@ for i, (col, titulo) in enumerate(preguntas.items()):
     conteo = df_filtrado[col].value_counts().reindex(["Excelente", "Muy Bueno", "Bueno", "Regular", "Deficiente"], fill_value=0)
 
     if i % 2 == 0:
-        # Gráfico tipo pastel mejorado
+        # Gráfico tipo pastel
         fig = px.pie(
             names=conteo.index,
             values=conteo.values,
@@ -74,11 +80,9 @@ for i, (col, titulo) in enumerate(preguntas.items()):
             pull=[0.05 for _ in conteo.index],
             textposition='inside'
         )
-        fig.update_layout(
-            showlegend=True
-        )
+        fig.update_layout(showlegend=True)
     else:
-        # Gráfico de barras mejorado
+        # Gráfico de barras
         fig = px.bar(
             x=conteo.index,
             y=conteo.values,
@@ -97,7 +101,7 @@ for i, (col, titulo) in enumerate(preguntas.items()):
 st.subheader("📄 Respuestas Registradas")
 st.dataframe(df_filtrado)
 
-# ==== Sección de resumen general ====
+# ==== Resumen general si se selecciona "Todos" ====
 if facilitador_seleccionado == "Todos":
     st.title("🌎 Resumen General del Equipo Evaluador")
 
@@ -115,4 +119,5 @@ if facilitador_seleccionado == "Todos":
         showlegend=False
     )
     st.plotly_chart(fig_total, use_container_width=True)
+
 
