@@ -4,6 +4,8 @@ import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 from datetime import datetime
 import json
+import qrcode
+from io import BytesIO
 
 # ==== Configuración desde secrets ====
 scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
@@ -21,6 +23,19 @@ def enviar_respuesta(respuesta):
 
 # ==== Formulario en Streamlit ====
 st.title("📋 Formulario de Evaluación de Facilitadores")
+
+# ==== Mostrar QR debajo del título ====
+import qrcode
+from io import BytesIO
+
+link = "https://evaluacionfacilitadoresapp-z8gyby5qcicrvcxhsdkpc5.streamlit.app/"
+qr = qrcode.make(link)
+buf = BytesIO()
+qr.save(buf)
+st.image(buf.getvalue(), caption="🔗 Escanea para abrir la App", width=150)
+
+# (Aquí seguiría todo tu formulario como estaba...)
+
 
 with st.form(key='evaluacion_form'):
     nombre = st.text_input("Nombre del Participante:")
