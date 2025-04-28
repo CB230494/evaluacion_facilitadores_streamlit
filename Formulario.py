@@ -25,15 +25,15 @@ def enviar_respuesta(respuesta):
 st.title("📋 Formulario de Evaluación de Facilitadores")
 
 # ==== Mostrar QR debajo del título ====
-import qrcode
-from io import BytesIO
+link = "https://evaluacionfacilitadoresapp-eu7f2rvkprw5hxjuzuqdez.streamlit.app/"
 
-link = "https://evaluacionfacilitadoresapp-z8gyby5qcicrvcxhsdkpc5.streamlit.app/"
+# Crear código QR
 qr = qrcode.make(link)
 buf = BytesIO()
 qr.save(buf)
-st.image(buf.getvalue(), caption="🔗 Escanea para abrir la App", width=150)
 
+# Mostrar imagen del QR
+st.image(buf.getvalue(), caption="🔗 Escanea para abrir el Formulario", width=150)
 # (Aquí seguiría todo tu formulario como estaba...)
 
 
