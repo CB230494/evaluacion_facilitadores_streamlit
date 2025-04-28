@@ -22,7 +22,7 @@ def enviar_respuesta(respuesta):
     sheet.append_row(respuesta)
 
 # ==== Formulario en Streamlit ====
-st.title("📋 Formulario de Evaluación de Facilitadores")
+st.markdown("### 📝 Evaluación de equipo Estrategia Sembremos Seguridad")
 
 # ==== Mostrar QR debajo del título ====
 link = "https://evaluacionfacilitadoresapp-eu7f2rvkprw5hxjuzuqdez.streamlit.app/"
