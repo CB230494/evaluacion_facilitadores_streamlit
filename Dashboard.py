@@ -35,8 +35,11 @@ if facilitador_seleccionado == "Todos":
 else:
     df_filtrado = data[data["Facilitador"] == facilitador_seleccionado]
 
-# ==== Subtítulo de sección ====
+# ==== Subtítulo y contador de respuestas ====
 st.subheader(f"📋 Evaluaciones de: {facilitador_seleccionado}")
+
+cantidad_respuestas = len(df_filtrado)
+st.markdown(f"**📝 Total de respuestas recibidas: {cantidad_respuestas}**")
 
 # ==== Definir preguntas y nombres bonitos ====
 preguntas = {
