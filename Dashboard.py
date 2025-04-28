@@ -5,7 +5,7 @@ import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 import json
 
-# ==== Configuración desde secrets ====
+# ==== Configuración de conexión desde secrets ====
 scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
 credentials_dict = st.secrets["gcp_service_account"]
 credentials = ServiceAccountCredentials.from_json_keyfile_dict(credentials_dict, scope)
@@ -16,78 +16,100 @@ SHEET_NAME = "respuestas_facilitadores"
 sheet = client.open(SHEET_NAME).sheet1
 data = pd.DataFrame(sheet.get_all_records())
 
-# ==== LIMPIAR NOMBRES DE COLUMNAS ====
+# ==== LIMPIAR nombres de columnas ====
 data.columns = data.columns.str.strip()
 
 # ==== Agregar ID único ====
 data.insert(0, "ID", range(1, 1 + len(data)))
 
+# ==== Título Principal ====
 st.title("📈 Dashboard de Evaluaciones de Facilitadores")
 
 # ==== Filtro de facilitadores ====
 opciones_facilitador = ["Todos"] + sorted(data["Facilitador"].unique().tolist())
 facilitador_seleccionado = st.selectbox("Selecciona un Facilitador:", opciones_facilitador)
 
-# ==== Selección de datos según filtro ====
+# ==== Filtrar datos según selección ====
 if facilitador_seleccionado == "Todos":
     df_filtrado = data.copy()
 else:
     df_filtrado = data[data["Facilitador"] == facilitador_seleccionado]
 
+# ==== Subtítulo de sección ====
 st.subheader(f"📋 Evaluaciones de: {facilitador_seleccionado}")
 
-# ==== Definir las preguntas ====
+# ==== Definir preguntas y nombres bonitos ====
 preguntas = {
-    "P1_Dominio_Tema": "Dominio del tema",
-    "P2_Claridad_Exposición": "Claridad en la exposición",
-    "P3_Organización_Contenidos": "Organización de contenidos",
-    "P4_Uso_Presentación": "Uso de presentación",
-    "P5_Promueve_Participación": "Promueve participación",
-    "P6_Aclaración_Dudas": "Aclaración de dudas",
-    "P7_Metodología": "Metodología aplicada",
-    "P8_Actitud_Respeto": "Actitud respetuosa",
-    "P9_Duración_Adecuada": "Duración adecuada",
-    "P10_Cumplimiento_Objetivos": "Cumplimiento de objetivos"
+    "P1_Dominio_Tema": "📚 Dominio del tema",
+    "P2_Claridad_Exposición": "🎤 Claridad en la exposición",
+    "P3_Organización_Contenidos": "🧠 Organización de contenidos",
+    "P4_Uso_Presentación": "🖥️ Uso de presentación",
+    "P5_Promueve_Participación": "🤝 Promueve participación",
+    "P6_Aclaración_Dudas": "❓ Aclaración de dudas",
+    "P7_Metodología": "🛠️ Metodología aplicada",
+    "P8_Actitud_Respeto": "🤗 Actitud respetuosa",
+    "P9_Duración_Adecuada": "⏳ Duración adecuada",
+    "P10_Cumplimiento_Objetivos": "🎯 Cumplimiento de objetivos"
 }
 
-# ==== Graficar preguntas ====
+# ==== Graficar cada pregunta ====
 for i, (col, titulo) in enumerate(preguntas.items()):
     st.write(f"### {titulo}")
     conteo = df_filtrado[col].value_counts().reindex(["Excelente", "Muy Bueno", "Bueno", "Regular", "Deficiente"], fill_value=0)
 
     if i % 2 == 0:
-        # Gráfico tipo pastel
+        # Gráfico tipo pastel mejorado
         fig = px.pie(
             names=conteo.index,
             values=conteo.values,
-            title=f"{titulo} (Gráfico de Pastel)",
-            hole=0.4
+            title=f"{titulo}",
+            hole=0.4,
+            color_discrete_sequence=px.colors.qualitative.Pastel
+        )
+        fig.update_traces(
+            textinfo='percent+label',
+            pull=[0.05 for _ in conteo.index],
+            textposition='inside'
+        )
+        fig.update_layout(
+            showlegend=True
         )
     else:
-        # Gráfico tipo barra
+        # Gráfico de barras mejorado
         fig = px.bar(
             x=conteo.index,
             y=conteo.values,
             labels={'x': 'Respuesta', 'y': 'Cantidad'},
-            title=f"{titulo} (Gráfico de Barras)"
+            title=f"{titulo}",
+            color=conteo.index,
+            color_discrete_sequence=px.colors.qualitative.Set3
         )
-        fig.update_layout(yaxis=dict(dtick=1))  # Para que suba de 1 en 1
-    
+        fig.update_layout(
+            yaxis=dict(dtick=1),
+            showlegend=False
+        )
     st.plotly_chart(fig, use_container_width=True)
 
 # ==== Mostrar tabla de respuestas ====
 st.subheader("📄 Respuestas Registradas")
 st.dataframe(df_filtrado)
 
-# ==== Gráfico resumen de evaluaciones por facilitador ====
+# ==== Sección de resumen general ====
 if facilitador_seleccionado == "Todos":
-    st.subheader("🌎 Resumen General del Equipo Evaluador")
+    st.title("🌎 Resumen General del Equipo Evaluador")
+
     conteo_global = data["Facilitador"].value_counts()
     fig_total = px.bar(
         x=conteo_global.index,
         y=conteo_global.values,
         labels={'x': 'Facilitador', 'y': 'Cantidad de Evaluaciones'},
-        title="Total de Evaluaciones por Facilitador"
+        title="Total de Evaluaciones por Facilitador",
+        color=conteo_global.index,
+        color_discrete_sequence=px.colors.qualitative.Set2
     )
-    fig_total.update_layout(yaxis=dict(dtick=1))
+    fig_total.update_layout(
+        yaxis=dict(dtick=1),
+        showlegend=False
+    )
     st.plotly_chart(fig_total, use_container_width=True)
+
