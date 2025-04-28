@@ -13,7 +13,7 @@ credentials_dict = st.secrets["gcp_service_account"]
 credentials = ServiceAccountCredentials.from_json_keyfile_dict(credentials_dict, scope)
 client = gspread.authorize(credentials)
 
-# Nombre de tu Google Sheets
+# ==== Nombre de tu Google Sheets ====
 SHEET_NAME = "respuestas_facilitadores"
 sheet = client.open(SHEET_NAME).sheet1
 
@@ -34,17 +34,22 @@ qr.save(buf)
 
 # Mostrar imagen del QR
 st.image(buf.getvalue(), caption="🔗 Escanea para abrir el Formulario", width=150)
-# (Aquí seguiría todo tu formulario como estaba...)
 
-
+# ==== Iniciar el Formulario ====
 with st.form(key='evaluacion_form'):
     nombre = st.text_input("Nombre del Participante:")
     puesto = st.text_input("Puesto:")
     delegacion = st.text_input("Delegación:")
-    facilitador = st.selectbox("Facilitador:", [
-        "Esteban Cordero Solórzano", "Pamela Montero Pérez", "Jannia Valles Brizuela",
-        "Manfred Rivera Meneses", "Carlos Castro Loaiciga", "Adrián Alvarado García", "Luis Vásquez Solís"
-    ])
+
+    # ==== Selección múltiple de facilitadores ====
+    facilitadores = st.multiselect(
+        "Facilitadores:",
+        [
+            "Esteban Cordero Solórzano", "Pamela Montero Pérez", "Jannia Valles Brizuela",
+            "Manfred Rivera Meneses", "Carlos Castro Loaiciga", "Adrián Alvarado García", "Luis Vásquez Solís"
+        ]
+    )
+
     fecha_taller = st.date_input("Fecha del Taller:")
 
     opciones = ["Excelente", "Muy Bueno", "Bueno", "Regular", "Deficiente"]
@@ -66,11 +71,19 @@ with st.form(key='evaluacion_form'):
     submit_button = st.form_submit_button(label='Enviar Evaluación')
 
     if submit_button:
-        respuesta = [
-            datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-            nombre, puesto, delegacion, facilitador, str(fecha_taller),
-            p1, p2, p3, p4, p5, p6, p7, p8, p9, p10,
-            aspectos_positivos, sugerencias
-        ]
-        enviar_respuesta(respuesta)
-        st.success("✅ ¡Evaluación enviada correctamente!")
+        # ==== Validar que al menos un facilitador haya sido seleccionado ====
+        if not facilitadores:
+            st.error("⚠️ Debes seleccionar al menos un facilitador antes de enviar el formulario.")
+        else:
+            facilitadores_texto = ", ".join(facilitadores)
+
+            respuesta = [
+                datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                nombre, puesto, delegacion, facilitadores_texto, str(fecha_taller),
+                p1, p2, p3, p4, p5, p6, p7, p8, p9, p10,
+                aspectos_positivos, sugerencias
+            ]
+
+            enviar_respuesta(respuesta)
+            st.success("✅ ¡Evaluación enviada correctamente!")
+
