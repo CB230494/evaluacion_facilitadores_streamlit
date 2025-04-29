@@ -41,20 +41,17 @@ if facilitador_seleccionado == "Todos":
 else:
     df_filtrado = data[data["Facilitador"] == facilitador_seleccionado]
 
-# ==== Subtítulo y contador de respuestas ====
+# ==== Subtítulo principal ====
 st.subheader(f"📋 Evaluaciones de: {facilitador_seleccionado}")
 
-cantidad_respuestas = len(df_filtrado)
-st.markdown(f"**📝 Total de respuestas recibidas: {cantidad_respuestas}**")
-
-# ==== Contador personalizado para facilitador individual ====
+# ==== Desglose personalizado para facilitador ====
 if facilitador_seleccionado != "Todos":
-    total_respuestas_facilitador = data[data["Facilitador"] == facilitador_seleccionado].shape[0]
+    total_respuestas_facilitador = df_filtrado.shape[0]
     st.markdown(
         f"""
-        <div style='display:flex; align-items:center; gap:10px;'>
-            <img src='https://cdn-icons-png.flaticon.com/512/3602/3602123.png' width='20'/>
-            <span style='font-size:18px'><strong>Total de respuestas recibidas por {facilitador_seleccionado}:</strong> {total_respuestas_facilitador}</span>
+        <div style='display:flex; align-items:center; gap:10px; margin-bottom:10px;'>
+            <img src='https://cdn-icons-png.flaticon.com/512/3595/3595455.png' width='20'/>
+            <span style='font-size:19px'><strong>Total de evaluaciones para el facilitador {facilitador_seleccionado} en los meses registrados:</strong> {total_respuestas_facilitador}</span>
         </div>
         """,
         unsafe_allow_html=True
@@ -92,7 +89,7 @@ for i, (col, titulo) in enumerate(preguntas.items()):
             pull=[0.05 for _ in conteo.index],
             textposition='inside'
         )
-        fig.update_layout(showlegend=True)
+        fig.update_layout(showlegend=True, title_font_size=24)
     else:
         # Gráfico de barras
         fig = px.bar(
@@ -105,7 +102,8 @@ for i, (col, titulo) in enumerate(preguntas.items()):
         )
         fig.update_layout(
             yaxis=dict(dtick=1),
-            showlegend=False
+            showlegend=False,
+            title_font_size=24
         )
 
     st.plotly_chart(fig, use_container_width=True)
@@ -129,7 +127,8 @@ if facilitador_seleccionado == "Todos":
     )
     fig_total.update_layout(
         yaxis=dict(dtick=1),
-        showlegend=False
+        showlegend=False,
+        title_font_size=24
     )
     st.plotly_chart(fig_total, use_container_width=True)
 
