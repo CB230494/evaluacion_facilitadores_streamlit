@@ -50,7 +50,7 @@ if facilitador_seleccionado != "Todos":
     st.markdown(
         f"""
         <div style='display:flex; align-items:center; gap:10px; margin-bottom:10px;'>
-            <span style='font-size:19px'><strong>Total de evaluaciones para el facilitador, {facilitador_seleccionado} :</strong> {total_respuestas_facilitador}</span>
+            <span style='font-size:19px'><strong>Total de evaluaciones para el facilitador: {facilitador_seleccionado} =</strong> {total_respuestas_facilitador}</span>
         </div>
         """,
         unsafe_allow_html=True
@@ -107,9 +107,9 @@ for i, (col, titulo) in enumerate(preguntas.items()):
 
     st.plotly_chart(fig, use_container_width=True)
 
-# ==== Mostrar tabla de respuestas ====
+# ==== Mostrar tabla de respuestas (sin timestamp) ====
 st.subheader("📄 Respuestas Registradas")
-st.dataframe(df_filtrado)
+st.dataframe(df_filtrado.drop(columns=["timestamp"], errors="ignore"))
 
 # ==== Resumen general si se selecciona "Todos" ====
 if facilitador_seleccionado == "Todos":
@@ -130,4 +130,3 @@ if facilitador_seleccionado == "Todos":
         title_font_size=24
     )
     st.plotly_chart(fig_total, use_container_width=True)
-
