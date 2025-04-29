@@ -22,7 +22,7 @@ data.columns = data.columns.map(str).str.strip()
 # ==== EXPLOTAR facilitadores múltiples ====
 data["Facilitador"] = data["Facilitador"].str.split(",\s*")  # Separa múltiples nombres
 data = data.explode("Facilitador")                           # Crea filas separadas
-data["Facilitador"] = data["Facilitador"].str.strip()         # Limpia espacios
+data["Facilitador"] = data["Facilitador"].str.strip()        # Limpia espacios
 
 # ==== Agregar ID único (opcional) ====
 if "ID" not in data.columns:
@@ -47,6 +47,19 @@ st.subheader(f"📋 Evaluaciones de: {facilitador_seleccionado}")
 cantidad_respuestas = len(df_filtrado)
 st.markdown(f"**📝 Total de respuestas recibidas: {cantidad_respuestas}**")
 
+# ==== Contador personalizado para facilitador individual ====
+if facilitador_seleccionado != "Todos":
+    total_respuestas_facilitador = data[data["Facilitador"] == facilitador_seleccionado].shape[0]
+    st.markdown(
+        f"""
+        <div style='display:flex; align-items:center; gap:10px;'>
+            <img src='https://cdn-icons-png.flaticon.com/512/3602/3602123.png' width='20'/>
+            <span style='font-size:18px'><strong>Total de respuestas recibidas por {facilitador_seleccionado}:</strong> {total_respuestas_facilitador}</span>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
 # ==== Definir preguntas y nombres bonitos ====
 preguntas = {
     "P1_Dominio_Tema": "📚 Dominio del tema",
@@ -63,7 +76,6 @@ preguntas = {
 
 # ==== Graficar cada pregunta ====
 for i, (col, titulo) in enumerate(preguntas.items()):
-    st.write(f"### {titulo}")
     conteo = df_filtrado[col].value_counts().reindex(["Excelente", "Muy Bueno", "Bueno", "Regular", "Deficiente"], fill_value=0)
 
     if i % 2 == 0:
@@ -71,7 +83,7 @@ for i, (col, titulo) in enumerate(preguntas.items()):
         fig = px.pie(
             names=conteo.index,
             values=conteo.values,
-            title=f"{titulo}",
+            title=titulo,
             hole=0.4,
             color_discrete_sequence=px.colors.qualitative.Pastel
         )
@@ -87,7 +99,7 @@ for i, (col, titulo) in enumerate(preguntas.items()):
             x=conteo.index,
             y=conteo.values,
             labels={'x': 'Respuesta', 'y': 'Cantidad'},
-            title=f"{titulo}",
+            title=titulo,
             color=conteo.index,
             color_discrete_sequence=px.colors.qualitative.Set3
         )
@@ -95,6 +107,7 @@ for i, (col, titulo) in enumerate(preguntas.items()):
             yaxis=dict(dtick=1),
             showlegend=False
         )
+
     st.plotly_chart(fig, use_container_width=True)
 
 # ==== Mostrar tabla de respuestas ====
@@ -119,5 +132,4 @@ if facilitador_seleccionado == "Todos":
         showlegend=False
     )
     st.plotly_chart(fig_total, use_container_width=True)
-
 
