@@ -50,8 +50,7 @@ if facilitador_seleccionado != "Todos":
     st.markdown(
         f"""
         <div style='display:flex; align-items:center; gap:10px; margin-bottom:10px;'>
-            <img src='https://cdn-icons-png.flaticon.com/512/3595/3595455.png' width='20'/>
-            <span style='font-size:19px'><strong>Total de evaluaciones para el facilitador {facilitador_seleccionado} en los meses registrados:</strong> {total_respuestas_facilitador}</span>
+            <span style='font-size:19px'><strong>Total de evaluaciones para el facilitador {facilitador_seleccionado} :</strong> {total_respuestas_facilitador}</span>
         </div>
         """,
         unsafe_allow_html=True
